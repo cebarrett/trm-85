@@ -90,9 +90,149 @@ The MVP ships the minimum feature set that enables the core viral moment: a user
 
 ### Why This Architecture
 
-- **Express proxy, not serverless:** SSE streaming requires a long-lived connection. Serverless functions (Lambda, Cloudflare Workers) have execution time limits and are awkward for streaming. A simple Express server gives us reliable long-lived SSE pipes with minimal complexity.
+- **Express proxy, not serverless:** SSE streaming requires a long-lived connection with no buffering. While AWS Lambda now supports response streaming via Function URLs, it introduces cold-start latency (noticeable on the first request after idle) and has buffering behavior that can add chunkiness to token delivery. Since the entire product is about the *feel* of streaming, a real long-running server process gives us predictable, unbuffered SSE. The Express server is tiny — the Fargate cost at MVP scale is negligible.
 - **No database:** MVP stores conversation history in React state (lost on refresh). Local storage persistence is a nice-to-have that can be added trivially without architectural changes.
 - **No auth:** MVP is open. Rate limiting by IP is sufficient for launch. BYOK and accounts come later.
+
+### AWS Deployment Architecture
+
+```
+                          ┌──────────────┐
+                          │   Route 53   │
+                          │  (DNS)       │
+                          └──────┬───────┘
+                                 │
+                          ┌──────▼───────┐
+                          │  CloudFront  │
+                          │  Distribution│
+                          │  + WAF       │
+                          └──┬────────┬──┘
+                 ┌───────────┘        └───────────┐
+         /api/* (origin 2)              /* (origin 1, default)
+                 │                                │
+          ┌──────▼───────┐                ┌───────▼──────┐
+          │     ALB      │                │   S3 Bucket  │
+          │ (internal)   │                │  (static)    │
+          └──────┬───────┘                │  client/dist │
+                 │                        └──────────────┘
+          ┌──────▼───────┐
+          │ ECS Fargate  │
+          │  Service     │
+          │ (Express     │
+          │  proxy)      │
+          └──────┬───────┘
+                 │
+          ┌──────▼───────┐        ┌──────────────────┐
+          │  Secrets     │        │   Anthropic API   │
+          │  Manager     │        │                   │
+          │ (API key)    │        └──────────────────┘
+          └──────────────┘
+```
+
+**Service roles:**
+
+| Service | Role |
+|---------|------|
+| **Route 53** | DNS. Maps `trm-85.example.com` to the CloudFront distribution. |
+| **CloudFront** | Unified entry point. Routes `/api/*` to the ALB origin, everything else to S3. Handles TLS termination, caching of static assets, and geographic distribution. |
+| **WAF** | Attached to CloudFront. Handles rate limiting (replaces the in-memory token bucket). IP-based rate rules: 30 requests per 1-minute window to `/api/*`. |
+| **S3** | Hosts the built React SPA (`client/dist/`). Private bucket, accessed only via CloudFront Origin Access Control. |
+| **ALB** | Internal Application Load Balancer in front of the Fargate service. Handles health checks, distributes across tasks if scaled. Configured with idle timeout of 300s to support long SSE streams. |
+| **ECS Fargate** | Runs the Express container. Minimum 1 task, auto-scales on CPU (target 60%). Each task runs the same stateless proxy. |
+| **Secrets Manager** | Stores `ANTHROPIC_API_KEY`. The Fargate task role has read access. Value injected as an environment variable at task start. |
+
+**Why these choices:**
+
+- **CloudFront in front of everything** (not just S3): Gives us a single domain, no CORS issues between client and API, TLS handled in one place, and WAF rate limiting without building our own.
+- **ALB idle timeout = 300s**: Default is 60s, which would kill SSE connections for long Claude responses. 300s is generous — even a max-length Opus response won't take 5 minutes.
+- **Fargate, not EC2**: No instances to patch. Scales to zero-ish (minimum 1 task, but that's ~$15/month for a small container). For MVP traffic, 1 task is enough.
+- **Fargate, not App Runner**: App Runner is simpler but gives less control over ALB timeouts, VPC configuration, and scaling policies. The SSE idle timeout issue alone makes Fargate worth the extra configuration.
+- **Fargate, not Lambda**: As discussed above — cold starts and streaming buffering undermine the core UX. Lambda is the right call for many APIs, but not for one where token-by-token streaming latency is the product.
+
+### Alternative: AppSync + Lambda (GraphQL)
+
+If we prefer a fully serverless approach with managed real-time infrastructure, AWS AppSync is a strong option. It replaces the Fargate/ALB/Express layer entirely.
+
+```
+                          ┌──────────────┐
+                          │  CloudFront  │
+                          └──┬────────┬──┘
+                 ┌───────────┘        └───────────┐
+            /graphql                        /* (static)
+                 │                                │
+          ┌──────▼───────┐                ┌───────▼──────┐
+          │   AppSync    │                │   S3 Bucket  │
+          │  (GraphQL    │                │  client/dist │
+          │   API)       │                └──────────────┘
+          └──┬────────┬──┘
+    Mutation │        │ Subscription
+    (sendMsg)│        │ (onToken)
+          ┌──▼────┐   │
+          │Lambda │   │  WebSocket (managed)
+          │Resolver│  │
+          └──┬────┘   │
+             │        │
+  Reads Claude stream, │
+  publishes token      │
+  batches back to  ────┘
+  AppSync subscription
+```
+
+**GraphQL schema:**
+
+```graphql
+type Mutation {
+  sendMessage(input: SendMessageInput!): SendMessageResponse!
+}
+
+type Subscription {
+  onTokens(sessionId: ID!): TokenBatch
+    @aws_subscribe(mutations: ["publishTokens"])
+}
+
+type Mutation {
+  # Internal — called by Lambda, not the client
+  publishTokens(sessionId: ID!, tokens: String!, done: Boolean!): TokenBatch
+}
+
+input SendMessageInput {
+  sessionId: ID!
+  messages: [MessageInput!]!
+  temperature: Float!
+}
+
+type TokenBatch {
+  sessionId: ID!
+  tokens: String!
+  done: Boolean!
+}
+```
+
+**Flow:**
+
+1. Client opens a WebSocket subscription to `onTokens(sessionId)` via AppSync
+2. Client sends `sendMessage` mutation with conversation history + temperature
+3. Lambda resolver receives the mutation, calls Claude Messages API with `stream: true`
+4. Lambda reads Claude's SSE stream, batches token deltas (~50ms batches), and calls the `publishTokens` mutation on AppSync for each batch
+5. AppSync pushes each `TokenBatch` to the client's WebSocket subscription
+6. Client processes batches identically to how it would process SSE chunks
+
+**Tradeoffs vs Fargate:**
+
+| Concern | Fargate + SSE | AppSync + Lambda |
+|---------|--------------|-----------------|
+| **Streaming latency** | Minimal — raw byte pipe, 1 network hop | Extra hop per batch (Lambda → AppSync → client). Adds ~10-30ms per batch, likely imperceptible when batching at 50ms intervals |
+| **Infrastructure** | ALB + Fargate service + task definition | Managed — AppSync handles connections, scaling, WebSocket lifecycle |
+| **Cost at low traffic** | ~$15/month minimum (1 Fargate task always running) | Near-zero at idle (pay per request + subscription event) |
+| **Cost at scale** | Predictable (Fargate tasks scale linearly) | AppSync charges $2/million real-time updates — token batching keeps this reasonable but watch it |
+| **EJECT (abort)** | Clean — `req.on("close")` cancels upstream reader | Harder — need a signal mechanism (e.g., DynamoDB flag polled by Lambda, or just let Lambda finish and discard on client) |
+| **Local development** | `npm run dev` — trivial | Needs AppSync simulator or mocks. More friction for local iteration |
+| **Cold starts** | None (server always running) | Lambda cold start on first request after idle (~200-500ms). Not on the streaming path though — only on the initial mutation |
+| **Complexity** | Lower — one Express file | Higher — GraphQL schema, resolver config, subscription wiring, IAM roles |
+
+**Recommendation:** Start with Fargate + SSE for MVP. The streaming latency characteristics are more predictable, EJECT is trivially clean, and local development is frictionless. Migrate to AppSync in Phase 2–3 if we want to go fully serverless, especially once session recording/sharing (which benefits from subscription-based architecture) is in scope. The client-side hook interface (`useChat`, `useStreaming`) stays the same regardless — only the transport layer changes.
+
+That said, if the team has strong AppSync experience and values the serverless operational model, AppSync is entirely viable for MVP. The 50ms batching strategy neutralizes most of the latency concern, and the cold-start hit is a one-time cost per idle period.
 
 ---
 
@@ -159,6 +299,14 @@ trm-85/
 │   ├── middleware/
 │   │   └── rateLimiter.ts           # Token-bucket rate limiting
 │   └── tsconfig.json
+├── infra/                           # AWS CDK infrastructure
+│   ├── bin/
+│   │   └── trm-85.ts               # CDK app entry point
+│   ├── lib/
+│   │   └── trm-85-stack.ts         # Single stack: S3, CloudFront, ECS, WAF
+│   ├── cdk.json
+│   └── tsconfig.json
+├── Dockerfile                       # Multi-stage build for server
 ├── package.json                     # Workspace root (npm workspaces)
 ├── tsconfig.base.json               # Shared TS config
 ├── .env.example                     # Template for ANTHROPIC_API_KEY
@@ -548,34 +696,24 @@ export async function chatRoute(req: Request, res: Response) {
 
 ### 7.3 Rate Limiter
 
-Simple token-bucket algorithm, keyed by IP.
+**Local development:** Simple in-memory token bucket (keyed by IP) for local dev, as originally designed. This is fine when there's one server process.
 
-```typescript
-const WINDOW_MS = 60_000;       // 1 minute
-const MAX_REQUESTS = 30;        // 30 requests per minute per IP
+**AWS production:** In-memory rate limiting breaks with multiple Fargate tasks because each task has its own memory space — a user's requests would be distributed across tasks by the ALB, and no single task sees the full count. Instead of adding Redis or DynamoDB for shared state, we use **AWS WAF** attached to the CloudFront distribution.
 
-const buckets = new Map<string, { count: number; resetTime: number }>();
+WAF rate-based rule configuration:
 
-export function rateLimiter(req, res, next) {
-  const ip = req.ip;
-  const now = Date.now();
-  const bucket = buckets.get(ip);
-
-  if (!bucket || now > bucket.resetTime) {
-    buckets.set(ip, { count: 1, resetTime: now + WINDOW_MS });
-    return next();
-  }
-
-  if (bucket.count >= MAX_REQUESTS) {
-    return res.status(429).json({ error: "Rate limit exceeded" });
-  }
-
-  bucket.count++;
-  next();
-}
+```
+Rule: TRM85-RateLimit
+  - Scope: CloudFront distribution
+  - Match: URI path starts with "/api/"
+  - Rate limit: 30 requests per 1-minute window
+  - Aggregation key: Source IP
+  - Action: Block (returns 403)
 ```
 
-Periodically sweep expired buckets to avoid memory growth (setInterval, every 5 minutes).
+This is handled entirely at the edge before requests even reach the ALB. No application code needed. The Express server still has a lightweight in-memory fallback (`server/middleware/rateLimiter.ts`) as defense-in-depth, but WAF does the heavy lifting.
+
+**Why WAF over API Gateway throttling:** We're using CloudFront → ALB, not API Gateway. Adding API Gateway in front of the ALB just for throttling would add another hop and another service to configure. WAF is already on the CloudFront distribution — the rate rule is a single config addition.
 
 ### 7.4 Vite Dev Proxy
 
@@ -778,13 +916,15 @@ This avoids React's reconciliation overhead and ensures the needle animation nev
 
 | Scenario | Handling |
 |----------|----------|
-| API key missing on server | Server logs error at startup, returns 500 with generic message |
+| API key missing on server | Server logs error at startup, returns 500 with generic message. On Fargate: task fails health check, ECS restarts it — check Secrets Manager ARN in task definition. |
 | Anthropic API returns non-200 | Parse error body, forward user-friendly message to client via SSE error event |
 | Anthropic API rate limit (429) | Forward to client, display "Machine overheated — try again in a moment" in chat |
 | Network error during stream | Detect fetch failure, display "Signal lost" in chat, preserve any partial output |
 | Client disconnects mid-stream | Server cancels upstream request (via `req.on("close")`) |
 | Malformed SSE event | Skip the event, log warning. Do not crash the stream parser. |
-| Rate limit hit (our proxy) | Return 429, display "Cooling down..." message in chat area |
+| WAF rate limit (403) | CloudFront returns 403 before request reaches server. Client detects non-SSE 403 response, displays "Cooling down..." message in chat area |
+| ALB idle timeout | ALB closes connection after 300s. For responses that could exceed this, client detects closed connection and shows "Signal lost — transmission exceeded time limit" |
+| Fargate task crash | ECS auto-restarts the task. In-flight SSE connections on that task are lost — client detects the broken connection and shows a reconnect prompt |
 
 ---
 
@@ -871,19 +1011,145 @@ Under the hood, `npm run dev` runs `concurrently`:
 
 Vite proxies `/api/*` to port 3001, so the client hits `localhost:5173/api/chat` and it reaches Express.
 
-### Build & Deploy
+### Build
 
 ```bash
 npm run build                  # Builds client (vite build) + compiles server (tsc)
-npm start                      # Runs compiled server, which serves client static files
+npm start                      # Runs compiled server locally (for testing the prod build)
 ```
 
-The production Express server serves `client/dist/` as static files and handles `/api/*` routes. Single process, single port, deployable to any Node.js host (Railway, Render, Fly.io, a VPS).
+### Docker
 
-### Environment
+The server is containerized for Fargate deployment. Multi-stage Dockerfile:
+
+```dockerfile
+# Stage 1: Build client
+FROM node:20-alpine AS client-build
+WORKDIR /app
+COPY package*.json ./
+COPY client/package*.json ./client/
+RUN npm ci --workspace=client
+COPY client/ ./client/
+RUN npm run build --workspace=client
+
+# Stage 2: Build server
+FROM node:20-alpine AS server-build
+WORKDIR /app
+COPY package*.json ./
+COPY server/package*.json ./server/
+RUN npm ci --workspace=server
+COPY server/ ./server/
+RUN npm run build --workspace=server
+
+# Stage 3: Production image
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=server-build /app/server/dist ./server/dist
+COPY --from=server-build /app/node_modules ./node_modules
+COPY --from=client-build /app/client/dist ./client/dist
+EXPOSE 3001
+CMD ["node", "server/dist/index.js"]
+```
+
+The production image contains only compiled JS and `node_modules` — no TypeScript, no dev dependencies, no source. Image size target: < 150MB.
+
+Note: In the AWS architecture, the client static files in this image are unused — S3/CloudFront serves them instead. They're included in the image so the same container works for local `docker run` testing without needing S3.
+
+### AWS Deployment
+
+**Prerequisites:**
+- AWS CLI configured with appropriate credentials
+- AWS CDK CLI installed (`npm install -g aws-cdk`)
+- The API key stored in Secrets Manager (one-time manual step):
+  ```bash
+  aws secretsmanager create-secret \
+    --name trm-85/anthropic-api-key \
+    --secret-string "sk-ant-..."
+  ```
+
+**Deploy:**
 
 ```bash
-# .env (not committed)
+cd infra
+npm install
+cdk bootstrap               # First time only — sets up CDK toolkit stack
+cdk deploy                   # Deploys/updates the full stack
+```
+
+`cdk deploy` provisions everything in a single CloudFormation stack:
+1. S3 bucket + bucket policy
+2. CloudFront distribution + Origin Access Control
+3. WAF web ACL with rate-limiting rule
+4. VPC (public subnets only — Fargate tasks need internet access for Anthropic API)
+5. ECS cluster + Fargate service + task definition
+6. ALB + target group + listener
+7. IAM roles (task execution role with Secrets Manager read access)
+8. ECR repository (for the Docker image)
+
+**CI/CD (GitHub Actions):**
+
+```yaml
+# .github/workflows/deploy.yml
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      # Build and push Docker image to ECR
+      - run: aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_URI
+      - run: docker build -t $ECR_URI:${{ github.sha }} .
+      - run: docker push $ECR_URI:${{ github.sha }}
+
+      # Upload client build to S3
+      - run: npm ci && npm run build --workspace=client
+      - run: aws s3 sync client/dist/ s3://$BUCKET_NAME --delete
+
+      # Update Fargate service to use new image
+      - run: |
+          aws ecs update-service \
+            --cluster trm-85 \
+            --service trm-85-api \
+            --force-new-deployment
+
+      # Invalidate CloudFront cache for static assets
+      - run: aws cloudfront create-invalidation --distribution-id $CF_DIST_ID --paths "/*"
+```
+
+**Environment variables (production):**
+
+The Fargate task definition injects secrets at runtime:
+
+```json
+{
+  "containerDefinitions": [{
+    "secrets": [{
+      "name": "ANTHROPIC_API_KEY",
+      "valueFrom": "arn:aws:secretsmanager:us-east-1:ACCOUNT:secret:trm-85/anthropic-api-key"
+    }],
+    "environment": [{
+      "name": "PORT",
+      "value": "3001"
+    }, {
+      "name": "NODE_ENV",
+      "value": "production"
+    }]
+  }]
+}
+```
+
+No `.env` file in production. No secrets in the image or in environment variable config. Secrets Manager is the single source of truth.
+
+### Environment (local only)
+
+```bash
+# .env (not committed, local dev only)
 ANTHROPIC_API_KEY=sk-ant-...
 PORT=3001                      # Optional, defaults to 3001
 ```
@@ -892,7 +1158,7 @@ PORT=3001                      # Optional, defaults to 3001
 
 ## 16. Open Technical Questions
 
-1. **SSE vs WebSocket:** SSE (via fetch + ReadableStream) is simpler and sufficient for one-way streaming. If we later need bidirectional communication (e.g., live temperature updates during generation that adjust the in-flight request), we'd need WebSocket. For MVP, SSE is correct.
+1. **SSE vs WebSocket vs AppSync subscriptions:** SSE (via fetch + ReadableStream) is the simplest transport for one-way streaming and is the recommended MVP approach with Fargate. AppSync with GraphQL subscriptions is a strong alternative that brings managed WebSocket infrastructure, natural support for session-based channels, and a fully serverless model. The client-side hook interface is transport-agnostic — `useStreaming` consumes token batches regardless of whether they arrive via SSE or GraphQL subscription. Decision: start with SSE for MVP simplicity, migrate to AppSync if we go fully serverless in Phase 2+. If the team has strong AppSync experience, skip ahead.
 
 2. **Knob: SVG vs CSS vs Canvas?** CSS is recommended for MVP — fewer moving parts, GPU-composited transforms, and the brushed-metal texture is achievable with CSS gradients. SVG gives more control over the metal grain effect if CSS isn't convincing enough. Canvas is overkill for a single knob.
 
@@ -901,3 +1167,9 @@ PORT=3001                      # Optional, defaults to 3001
 4. **Font licensing:** Eurostile is a commercial font. If the project is open-source or the license is a concern, Orbitron (Google Fonts, OFL) is a viable free alternative with a similar industrial feel. Decide before development begins.
 
 5. **Max conversation length:** Claude's context window is large but not infinite. For MVP, cap conversation history sent to the API at the last 20 messages (10 exchanges). Display all messages in the UI but only send the recent window. This prevents runaway token costs and avoids hitting context limits.
+
+6. **AWS region:** `us-east-1` is the default for CloudFront and has the broadest service availability. If the primary audience is elsewhere, consider the region's latency to Anthropic's API endpoints.
+
+7. **Custom domain + TLS:** Route 53 hosted zone + ACM certificate in `us-east-1` (required for CloudFront). Decide on domain name before first deploy — changing CloudFront alternate domain names later is straightforward but requires a new certificate.
+
+8. **Cost guardrails:** Set up AWS Budgets alerts. Key cost drivers at MVP: Fargate (fixed ~$15/month at minimum), CloudFront (data transfer, likely < $5/month at MVP scale), WAF ($5/month base + $1/million requests), Anthropic API (variable, the real cost). Consider a hard monthly budget alert at $50 for AWS infra and a separate alert for Anthropic API spend.
