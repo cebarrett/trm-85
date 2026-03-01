@@ -1,0 +1,98 @@
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 80px;
+}
+
+.dialLabels {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.dialLabel {
+  position: absolute;
+  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-size: 9px;
+  color: #2a2a2a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  transform-origin: center;
+  user-select: none;
+}
+
+.knob {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 45% 40%,
+    #d0d0d0 0%,
+    #a8a8a8 30%,
+    #909090 60%,
+    #787878 100%
+  );
+  border: 3px solid #606060;
+  cursor: grab;
+  position: relative;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+  outline: none;
+  touch-action: none;
+  /* Brushed metal texture */
+  background-image:
+    radial-gradient(
+      circle at 45% 40%,
+      rgba(255, 255, 255, 0.15) 0%,
+      transparent 60%
+    ),
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(255, 255, 255, 0.03) 0deg 2deg,
+      transparent 2deg 4deg
+    );
+}
+
+.knob:active {
+  cursor: grabbing;
+}
+
+.knob:focus-visible {
+  outline: 2px solid #ff6600;
+  outline-offset: 4px;
+}
+
+.indicator {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 3px;
+  height: 20px;
+  background: #222;
+  border-radius: 1.5px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.readout {
+  font-family: "DSEG7 Classic", "Courier New", monospace;
+  font-size: 20px;
+  color: #ff1a1a;
+  background: #1a0000;
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid #333;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 6px rgba(255, 26, 26, 0.5);
+  letter-spacing: 2px;
+}

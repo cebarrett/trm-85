@@ -1,0 +1,72 @@
+.app {
+  min-height: 100vh;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.controlsSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.meterColumn {
+  display: flex;
+  align-items: center;
+}
+
+.knobColumn {
+  display: flex;
+  justify-content: center;
+}
+
+.indicatorsSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  gap: 20px;
+}
+
+.chatSection {
+  height: 300px;
+  margin-top: 16px;
+}
+
+/* Responsive: tablet */
+@media (max-width: 1023px) {
+  .controlsSection {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+}
+
+/* Responsive: mobile */
+@media (max-width: 767px) {
+  .app {
+    padding: 8px;
+    align-items: flex-start;
+  }
+
+  .controlsSection {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .indicatorsSection {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .chatSection {
+    height: 250px;
+  }
+}

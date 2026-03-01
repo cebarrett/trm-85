@@ -1,0 +1,40 @@
+.display {
+  position: relative;
+  background: #1a0000;
+  border: 2px solid #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  font-family: "DSEG7 Classic", "Courier New", monospace;
+}
+
+.background {
+  position: absolute;
+  top: 8px;
+  color: #330a00;
+  font-size: 32px;
+  letter-spacing: 2px;
+  user-select: none;
+  pointer-events: none;
+}
+
+.value {
+  position: relative;
+  color: #ff1a1a;
+  font-size: 32px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 26, 26, 0.6), 0 0 16px rgba(255, 26, 26, 0.3);
+  z-index: 1;
+}
+
+.label {
+  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-size: 9px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-top: 4px;
+}

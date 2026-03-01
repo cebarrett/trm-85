@@ -1,0 +1,39 @@
+/* Global resets */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  background: #1a1a1a;
+  color: #ccc;
+  overflow-x: hidden;
+}
+
+/* Prevent zoom on double-tap for knob interaction */
+html {
+  touch-action: manipulation;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
