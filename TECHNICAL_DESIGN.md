@@ -98,8 +98,8 @@ The MVP ships the minimum feature set that enables the core viral moment: a user
 
 ```
                           ┌──────────────┐
-                          │   Route 53   │
-                          │  (DNS)       │
+                          │ Squarespace  │
+                          │  Domains     │
                           └──────┬───────┘
                                  │
                           ┌──────▼───────┐
@@ -133,7 +133,7 @@ The MVP ships the minimum feature set that enables the core viral moment: a user
 
 | Service | Role |
 |---------|------|
-| **Route 53** | DNS. Maps `trm-85.example.com` to the CloudFront distribution. |
+| **Squarespace Domains** | DNS. Maps `trm-85.example.com` to the CloudFront distribution. |
 | **CloudFront** | Unified entry point. Routes `/api/*` to the ALB origin, everything else to S3. Handles TLS termination, caching of static assets, and geographic distribution. |
 | **WAF** | Attached to CloudFront. Handles rate limiting (replaces the in-memory token bucket). IP-based rate rules: 30 requests per 1-minute window to `/api/*`. |
 | **S3** | Hosts the built React SPA (`client/dist/`). Private bucket, accessed only via CloudFront Origin Access Control. |
@@ -1170,6 +1170,6 @@ PORT=3001                      # Optional, defaults to 3001
 
 6. **AWS region:** `us-east-1` is the default for CloudFront and has the broadest service availability. If the primary audience is elsewhere, consider the region's latency to Anthropic's API endpoints.
 
-7. **Custom domain + TLS:** Route 53 hosted zone + ACM certificate in `us-east-1` (required for CloudFront). Decide on domain name before first deploy — changing CloudFront alternate domain names later is straightforward but requires a new certificate.
+7. **Custom domain + TLS:** Squarespace Domains for DNS + ACM certificate in `us-east-1` (required for CloudFront). Decide on domain name before first deploy — changing CloudFront alternate domain names later is straightforward but requires a new certificate.
 
 8. **Cost guardrails:** Set up AWS Budgets alerts. Key cost drivers at MVP: Fargate (fixed ~$15/month at minimum), CloudFront (data transfer, likely < $5/month at MVP scale), WAF ($5/month base + $1/million requests), Anthropic API (variable, the real cost). Consider a hard monthly budget alert at $50 for AWS infra and a separate alert for Anthropic API spend.
