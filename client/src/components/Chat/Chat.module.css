@@ -1,0 +1,116 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0a0a0a;
+  border: 2px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.messageList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #333 #0a0a0a;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inputLabel {
+  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  font-size: 11px;
+  color: #33ff33;
+  font-weight: 600;
+  user-select: none;
+}
+
+.outputLabel {
+  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  font-size: 11px;
+  color: #ffb347;
+  font-weight: 600;
+  user-select: none;
+}
+
+.messageText {
+  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  font-size: 13px;
+  color: #cccccc;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.cursor {
+  animation: blink 600ms step-end infinite;
+  color: #ffb347;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.inputForm {
+  display: flex;
+  border-top: 1px solid #333;
+  background: #111;
+}
+
+.input {
+  flex: 1;
+  background: #0a0a0a;
+  border: none;
+  color: #33ff33;
+  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  font-size: 13px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.input::placeholder {
+  color: #444;
+}
+
+.input:disabled {
+  opacity: 0.5;
+}
+
+.transmitButton {
+  background: linear-gradient(to bottom, #444, #333);
+  border: none;
+  border-left: 1px solid #555;
+  color: #ddd;
+  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 10px 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.15s ease;
+}
+
+.transmitButton:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #555, #444);
+}
+
+.transmitButton:active:not(:disabled) {
+  background: #222;
+}
+
+.transmitButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -1,0 +1,110 @@
+.faceplate {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  /* Brushed aluminum */
+  background:
+    linear-gradient(
+      to bottom,
+      #c8c8c8 0%,
+      #b8b8b8 30%,
+      #a8a8a8 60%,
+      #a0a0a0 100%
+    );
+  /* Horizontal grain texture */
+  background-image:
+    linear-gradient(
+      to bottom,
+      #c8c8c8 0%, #b8b8b8 30%, #a8a8a8 60%, #a0a0a0 100%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 1px,
+      rgba(255, 255, 255, 0.03) 1px,
+      rgba(255, 255, 255, 0.03) 2px
+    );
+  border-radius: 8px;
+  border: 2px solid #888;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Phillips head screws */
+.screwTopLeft,
+.screwTopRight,
+.screwBottomLeft,
+.screwBottomRight {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 40% 35%,
+    #ccc,
+    #999 50%,
+    #777
+  );
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.screwTopLeft::after,
+.screwTopRight::after,
+.screwBottomLeft::after,
+.screwBottomRight::after {
+  content: "+";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  color: #555;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.screwTopLeft { top: 10px; left: 10px; }
+.screwTopRight { top: 10px; right: 10px; }
+.screwBottomLeft { bottom: 10px; left: 10px; }
+.screwBottomRight { bottom: 10px; right: 10px; }
+
+.header {
+  text-align: center;
+  padding: 12px 0 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.brand {
+  display: block;
+  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #2a2a2a;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  /* Engraved/debossed look */
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4),
+    0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.tagline {
+  display: block;
+  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-size: 9px;
+  color: #555;
+  letter-spacing: 4px;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.content {
+  position: relative;
+}
