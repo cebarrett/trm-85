@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
 export async function chatRoute(request: Request, response: Response) {
-  const { messages, temperature } = request.body;
+  const { messages, temperature, system } = request.body;
 
   if (!Array.isArray(messages) || typeof temperature !== "number") {
     response.status(400).json({ error: "Invalid request body" });
@@ -36,6 +36,7 @@ export async function chatRoute(request: Request, response: Response) {
           max_tokens: 1024,
           temperature: clampedTemperature,
           stream: true,
+          ...(typeof system === "string" && system ? { system } : {}),
           messages,
         }),
       }

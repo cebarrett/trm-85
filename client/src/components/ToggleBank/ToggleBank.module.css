@@ -1,0 +1,35 @@
+.bank {
+  padding: 12px 20px 16px;
+}
+
+.sectionLabel {
+  display: block;
+  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+/* Responsive: tablet — 4 columns */
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Responsive: mobile — 3 columns */
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

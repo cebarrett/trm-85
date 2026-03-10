@@ -61,6 +61,44 @@ export function useTemperature(): TemperatureContextValue {
   return context;
 }
 
+// --- Personality Toggles Context ---
+
+interface TogglesContextValue {
+  activeToggles: Set<string>;
+  toggle: (id: string) => void;
+}
+
+const TogglesContext = createContext<TogglesContextValue | null>(null);
+
+export function TogglesProvider({ children }: { children: ReactNode }) {
+  const [activeToggles, setActiveToggles] = useReducer(
+    (state: Set<string>, id: string) => {
+      const next = new Set(state);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    },
+    new Set<string>()
+  );
+
+  return (
+    <TogglesContext.Provider value={{ activeToggles, toggle: setActiveToggles }}>
+      {children}
+    </TogglesContext.Provider>
+  );
+}
+
+export function useToggles(): TogglesContextValue {
+  const context = useContext(TogglesContext);
+  if (!context) {
+    throw new Error("useToggles must be used within a TogglesProvider");
+  }
+  return context;
+}
+
 // --- Chat Context ---
 
 interface ChatState {
