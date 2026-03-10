@@ -24,7 +24,7 @@ export function useChat() {
   }, []);
 
   const sendMessage = useCallback(
-    async (content: string, temperature: number) => {
+    async (content: string, temperature: number, systemPrompt?: string) => {
       const userMessage: Message = {
         role: "user",
         content,
@@ -53,6 +53,7 @@ export function useChat() {
               content: text,
             })),
             temperature,
+            ...(systemPrompt ? { system: systemPrompt } : {}),
           }),
           signal: controller.signal,
         });

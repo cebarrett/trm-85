@@ -7,6 +7,12 @@ export interface Message {
 
 export type TemperatureZone = "clean" | "warm" | "warning" | "danger" | "chaos";
 
+export interface PersonalityToggle {
+  id: string;
+  label: string;
+  prompt: string;
+}
+
 export interface AppState {
   temperature: number;
   messages: Message[];
