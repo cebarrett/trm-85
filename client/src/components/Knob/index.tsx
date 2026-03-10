@@ -8,22 +8,18 @@ interface KnobProps {
 }
 
 const MIN_TEMP = 0;
-const MAX_TEMP = 1.1;
-const STEP = 0.01;
-const BIG_STEP = 0.1;
+const MAX_TEMP = 1.0;
+const STEP = 1 / 110; // one display-unit / 10
+const BIG_STEP = 1 / 11; // one display-unit
 const ROTATION_RANGE = 270; // degrees
 const START_ANGLE = -135; // 7 o'clock
 
-const DIAL_LABELS = [
-  { value: 0.0, label: "LOCKED DOWN" },
-  { value: 0.1, label: "Legal Department" },
-  { value: 0.3, label: "Wikipedia Editor" },
-  { value: 0.5, label: "Normal Claude" },
-  { value: 0.7, label: "Third Beer" },
-  { value: 0.9, label: "Jazz Improvisation" },
-  { value: 1.0, label: "Hold My Beer" },
-  { value: 1.1, label: "Speaking In Tongues" },
-];
+// Numeric 0–11 scale (Spinal Tap style). Internal values are 0–1.
+const DIAL_LABELS = Array.from({ length: 12 }, (_, i) => ({
+  value: i / 11,
+  label: String(i),
+  danger: i === 11,
+}));
 
 function temperatureToAngle(temperature: number): number {
   return START_ANGLE + (temperature / MAX_TEMP) * ROTATION_RANGE;
@@ -148,12 +144,12 @@ export function Knob({ temperature, onTemperatureChange }: KnobProps) {
   }, []);
 
   const angle = temperatureToAngle(temperature);
-  const displayTemp = temperature.toFixed(2);
+  const displayTemp = (temperature * 11).toFixed(1);
 
   return (
     <div className={styles.container}>
       <div className={styles.dialLabels}>
-        {DIAL_LABELS.map(({ value, label }) => {
+        {DIAL_LABELS.map(({ value, label, danger }) => {
           const labelAngle = temperatureToAngle(value);
           const radians = (labelAngle - 90) * (Math.PI / 180);
           const radius = 120;
@@ -162,7 +158,7 @@ export function Knob({ temperature, onTemperatureChange }: KnobProps) {
           return (
             <span
               key={value}
-              className={styles.dialLabel}
+              className={`${styles.dialLabel} ${danger ? styles.dialLabelDanger : ""}`}
               style={{
                 transform: `translate(${x}px, ${y}px)`,
               }}

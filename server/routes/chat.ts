@@ -14,7 +14,7 @@ export async function chatRoute(request: Request, response: Response) {
     return;
   }
 
-  const clampedTemperature = Math.min(Math.max(temperature, 0), 1.1);
+  const clampedTemperature = Math.min(Math.max(temperature, 0), 1.0);
 
   // Set SSE headers
   response.setHeader("Content-Type", "text/event-stream");

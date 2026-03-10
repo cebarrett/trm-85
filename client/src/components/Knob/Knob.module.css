@@ -28,6 +28,13 @@
   user-select: none;
 }
 
+.dialLabelDanger {
+  color: #cc0000;
+  font-weight: bold;
+  font-size: 11px;
+  text-shadow: 0 0 4px rgba(200, 0, 0, 0.5);
+}
+
 .knob {
   width: 120px;
   height: 120px;

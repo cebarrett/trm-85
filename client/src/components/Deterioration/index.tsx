@@ -23,7 +23,7 @@ export function Deterioration({ temperature }: DeteriorationProps) {
 
   if (zone === "clean") return null;
 
-  const warmOpacity = Math.min((temperature - 0.7) / 0.3, 1) * 0.05;
+  const warmOpacity = Math.min((temperature - 0.72) / 0.28, 1) * 0.05;
 
   return (
     <div className={styles.overlay} data-zone={zone}>
