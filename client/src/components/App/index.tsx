@@ -9,6 +9,7 @@ import { EjectButton } from "../EjectButton";
 import { ToggleBank, PERSONALITY_TOGGLES } from "../ToggleBank";
 import { Chat } from "../Chat";
 import { Deterioration } from "../Deterioration";
+import { buildSystemPrompt } from "../../utils/buildSystemPrompt";
 import styles from "./App.module.css";
 
 export function App() {
@@ -25,15 +26,10 @@ export function App() {
   } = useChat();
 
   const handleSendMessage = (content: string) => {
-    let systemPrompt: string | undefined;
-    if (activeToggles.size > 0) {
-      const fragments = PERSONALITY_TOGGLES
-        .filter((t) => activeToggles.has(t.id))
-        .map((t) => t.prompt);
-      systemPrompt =
-        "You are an AI assistant with the following personality modifiers active simultaneously. Combine all of them in your responses:\n\n" +
-        fragments.map((f, i) => `${i + 1}. ${f}`).join("\n");
-    }
+    const fragments = PERSONALITY_TOGGLES
+      .filter((t) => activeToggles.has(t.id))
+      .map((t) => t.prompt);
+    const systemPrompt = fragments.length > 0 ? buildSystemPrompt(fragments) : undefined;
     sendMessage(content, temperature, systemPrompt);
   };
 
