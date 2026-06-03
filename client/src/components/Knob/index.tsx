@@ -8,18 +8,22 @@ interface KnobProps {
 }
 
 const MIN_TEMP = 0;
-const MAX_TEMP = 1.0;
-const STEP = 1 / 110; // one display-unit / 10
-const BIG_STEP = 1 / 11; // one display-unit
+const MAX_TEMP = 1.1;
+const STEP = 0.01;
+const BIG_STEP = 0.1;
 const ROTATION_RANGE = 270; // degrees
 const START_ANGLE = -135; // 7 o'clock
 
-// Numeric 0–11 scale (Spinal Tap style). Internal values are 0–1.
-const DIAL_LABELS = Array.from({ length: 12 }, (_, i) => ({
-  value: i / 11,
-  label: String(i),
-  danger: i === 11,
-}));
+// Named labels at key positions on the 0–1.1 range dial
+const DIAL_LABELS = [
+  { value: 0,    label: "Normal Claude",  danger: false },
+  { value: 0.2,  label: "Warming Up",     danger: false },
+  { value: 0.4,  label: "Getting Loose",  danger: false },
+  { value: 0.6,  label: "Jazz Hands",     danger: false },
+  { value: 0.8,  label: "Seeing Sounds",  danger: false },
+  { value: 1.0,  label: "Unhinged",       danger: false },
+  { value: 1.1,  label: "Hold My Beer",   danger: true  },
+];
 
 function temperatureToAngle(temperature: number): number {
   return START_ANGLE + (temperature / MAX_TEMP) * ROTATION_RANGE;
@@ -144,51 +148,54 @@ export function Knob({ temperature, onTemperatureChange }: KnobProps) {
   }, []);
 
   const angle = temperatureToAngle(temperature);
-  const displayTemp = (temperature * 11).toFixed(1);
+  const displayTemp = temperature.toFixed(2);
 
   return (
     <div className={styles.container}>
-      <div className={styles.dialLabels}>
-        {DIAL_LABELS.map(({ value, label, danger }) => {
-          const labelAngle = temperatureToAngle(value);
-          const radians = (labelAngle - 90) * (Math.PI / 180);
-          const radius = 120;
-          const x = Math.cos(radians) * radius;
-          const y = Math.sin(radians) * radius;
-          return (
-            <span
-              key={value}
-              className={`${styles.dialLabel} ${danger ? styles.dialLabelDanger : ""}`}
-              style={{
-                transform: `translate(${x}px, ${y}px)`,
-              }}
-            >
-              {label}
-            </span>
-          );
-        })}
-      </div>
+      <div className={styles.dial}>
+        <div className={styles.dialLabels}>
+          {DIAL_LABELS.map(({ value, label, danger }) => {
+            const labelAngle = temperatureToAngle(value);
+            const radians = (labelAngle - 90) * (Math.PI / 180);
+            const radius = 110;
+            const x = Math.cos(radians) * radius;
+            const y = Math.sin(radians) * radius;
+            return (
+              <span
+                key={value}
+                className={`${styles.dialLabel} ${danger ? styles.dialLabelDanger : ""}`}
+                style={{
+                  // Offset to the radial point, then center the label box on it.
+                  transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
+                }}
+              >
+                {label}
+              </span>
+            );
+          })}
+        </div>
 
-      <div
-        ref={knobRef}
-        className={styles.knob}
-        role="slider"
-        tabIndex={0}
-        aria-valuemin={MIN_TEMP}
-        aria-valuemax={MAX_TEMP}
-        aria-valuenow={temperature}
-        aria-label="Temperature"
-        onKeyDown={handleKeyDown}
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          transform: `rotate(${angle}deg)`,
-        }}
-      >
-        <div className={styles.indicator} />
+        <div
+          ref={knobRef}
+          className={styles.knob}
+          role="slider"
+          tabIndex={0}
+          aria-valuemin={MIN_TEMP}
+          aria-valuemax={MAX_TEMP}
+          aria-valuenow={temperature}
+          aria-label="Temperature"
+          onKeyDown={handleKeyDown}
+          onWheel={handleWheel}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            transform: `rotate(${angle}deg)`,
+          }}
+        >
+          <div className={styles.indicator} />
+        </div>
       </div>
 
       <div className={styles.readout}>{displayTemp}</div>
