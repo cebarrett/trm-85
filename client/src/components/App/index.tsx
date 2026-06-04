@@ -38,40 +38,40 @@ export function App() {
       <Faceplate>
         <Deterioration temperature={temperature} />
 
-        <div className={styles.controlsSection}>
-          <div className={styles.meterColumn}>
-            <VUMeter tokenRate={tokenRate} temperature={temperature} />
+        <div className={styles.mainRow}>
+          <div className={styles.controls}>
+            <div className={styles.controlStrip}>
+              <div className={styles.knobZone}>
+                <Knob
+                  temperature={temperature}
+                  onTemperatureChange={setTemperature}
+                />
+              </div>
+
+              <div className={styles.column}>
+                <VUMeter tokenRate={tokenRate} temperature={temperature} />
+                <EjectButton onEject={abort} disabled={!isGenerating} />
+              </div>
+
+              <div className={styles.column}>
+                <LEDDisplay count={tokenCount} />
+                <SignalMeter temperature={temperature} />
+              </div>
+            </div>
+
+            <div className={styles.toggleZone}>
+              <ToggleBank activeToggles={activeToggles} onToggle={toggle} />
+            </div>
           </div>
 
-          <div className={styles.knobColumn}>
-            <Knob
-              temperature={temperature}
-              onTemperatureChange={setTemperature}
+          <div className={styles.chatZone}>
+            <Chat
+              messages={messages}
+              currentStreamedText={currentStreamedText}
+              isGenerating={isGenerating}
+              onSendMessage={handleSendMessage}
             />
           </div>
-
-          <div className={styles.meterColumn}>
-            <VUMeter tokenRate={tokenRate} temperature={temperature} />
-          </div>
-        </div>
-
-        <div className={styles.indicatorsSection}>
-          <LEDDisplay count={tokenCount} />
-          <SignalMeter temperature={temperature} />
-          <EjectButton onEject={abort} disabled={!isGenerating} />
-        </div>
-
-        <div className={styles.toggleSection}>
-          <ToggleBank activeToggles={activeToggles} onToggle={toggle} />
-        </div>
-
-        <div className={styles.chatSection}>
-          <Chat
-            messages={messages}
-            currentStreamedText={currentStreamedText}
-            isGenerating={isGenerating}
-            onSendMessage={handleSendMessage}
-          />
         </div>
       </Faceplate>
     </div>

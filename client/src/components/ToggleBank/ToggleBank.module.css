@@ -16,15 +16,9 @@
 
 .grid {
   display: grid;
+  /* 6-wide bank that fills the controls column under the control strip */
   grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
-}
-
-/* Responsive: tablet — 4 columns */
-@media (max-width: 1023px) {
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  gap: 8px;
 }
 
 /* Responsive: mobile — 3 columns */

@@ -1,76 +1,81 @@
 .app {
   min-height: 100vh;
-  background: #1a1a1a;
+  background: radial-gradient(120% 100% at 50% 25%, #2b2b30 0%, #161618 65%, #0e0e10 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 32px 20px;
 }
 
-.controlsSection {
+/* Two columns: all controls on the left, chat screen filling the right */
+.mainRow {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 20px 0;
+  align-items: stretch;
+  gap: 24px;
 }
 
-.meterColumn {
+.controls {
+  flex: 0 0 820px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
 }
 
-.knobColumn {
-  display: flex;
-  justify-content: center;
-}
-
-.indicatorsSection {
+/* Top of the left column: knob + meter + displays, spread across */
+.controlStrip {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  gap: 20px;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.22);
 }
 
-.toggleSection {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+.knobZone {
+  flex: 0 0 auto;
 }
 
-.chatSection {
-  height: 300px;
-  margin-top: 16px;
+/* A vertical stack of two instruments (VU over EJECT, TOKENS over SIGNAL) */
+.column {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 0 8px;
 }
 
-/* Responsive: tablet */
-@media (max-width: 1023px) {
-  .controlsSection {
-    flex-wrap: wrap;
-    gap: 16px;
+/* Bottom of the left column: personality toggles */
+.toggleZone {
+  padding-top: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+/* Right column: chat screen, full height of the controls column */
+.chatZone {
+  flex: 1 1 auto;
+  min-width: 440px;
+}
+
+/* ---- Responsive: stack when too narrow ---- */
+@media (max-width: 1200px) {
+  .mainRow {
+    flex-direction: column;
+  }
+
+  .controls {
+    flex: 0 0 auto;
+  }
+
+  .chatZone {
+    min-width: 0;
+    height: 300px;
   }
 }
 
-/* Responsive: mobile */
 @media (max-width: 767px) {
   .app {
     padding: 8px;
     align-items: flex-start;
-  }
-
-  .controlsSection {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .indicatorsSection {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .chatSection {
-    height: 250px;
   }
 }
