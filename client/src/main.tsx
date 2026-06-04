@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { TemperatureProvider, ChatProvider, TogglesProvider } from "./context/AppContext";
 import { App } from "./components/App";
+import "./styles/tokens.css";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(

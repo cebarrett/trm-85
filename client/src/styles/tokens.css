@@ -1,0 +1,83 @@
+/* ============================================================================
+   TRM-85 material & lighting tokens
+   ----------------------------------------------------------------------------
+   The whole skeuomorphic illusion depends on ONE consistent light source:
+   light comes from the TOP-LEFT. Every raised edge catches a highlight on its
+   top/left; every recess casts shadow on its top/left and catches light on its
+   bottom/right. All bevels below encode that. Don't fight it per-component.
+   ========================================================================== */
+
+:root {
+  /* ---- Brushed-aluminium panel palette (light -> dark) ---- */
+  --metal-100: #e2e3e6;
+  --metal-85: #c9cace;
+  --metal-70: #aeb0b5;
+  --metal-55: #95979d;
+  --metal-40: #797b81;
+  --metal-25: #5d5f65;
+  --metal-12: #424348;
+  --metal-05: #303135;
+
+  /* Main panel fill: a soft vertical sheen, lit from the top */
+  --panel-fill: linear-gradient(
+    166deg,
+    var(--metal-100) 0%,
+    var(--metal-70) 42%,
+    var(--metal-55) 72%,
+    var(--metal-40) 100%
+  );
+
+  /* Darker recessed metal (rails, wells) */
+  --panel-fill-dark: linear-gradient(
+    166deg,
+    var(--metal-55) 0%,
+    var(--metal-40) 55%,
+    var(--metal-25) 100%
+  );
+
+  /* Fine vertical brush striations, laid over a fill as a second background */
+  --brushed-grain: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0px,
+    rgba(255, 255, 255, 0.04) 1px,
+    rgba(0, 0, 0, 0.035) 1px,
+    rgba(0, 0, 0, 0.035) 2px
+  );
+
+  /* Greyscale fractal-noise grain (data URI; no asset). Use at low opacity
+     with mix-blend-mode: overlay to break up flat surfaces. */
+  --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* ---- Bevels (all obey the top-left light) ---- */
+  /* A raised plate: bright top edge, dark bottom edge, ambient drop shadow */
+  --bevel-raised:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 1px 0 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.35),
+    0 2px 5px rgba(0, 0, 0, 0.4);
+
+  /* A recessed well: shadow cast in from the top-left, light catch bottom */
+  --bevel-recessed:
+    inset 0 3px 6px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.35);
+
+  /* A thin engraved groove / hairline divider */
+  --engrave:
+    inset 0 1px 1px rgba(0, 0, 0, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.4);
+
+  /* ---- Indicator / LED accents ---- */
+  --led-red: #ff2a1a;
+  --led-amber: #ffb020;
+  --led-green: #62ff62;
+  --glow-red: 0 0 7px rgba(255, 42, 26, 0.7);
+  --glow-amber: 0 0 7px rgba(255, 176, 32, 0.75);
+
+  /* Painted knob indicator line */
+  --indicator-paint: #f4f1ea;
+
+  /* ---- Shared dimensions ---- */
+  --screw-size: 16px;
+  --rail-width: 30px;
+}

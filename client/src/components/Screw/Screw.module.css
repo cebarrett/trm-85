@@ -1,0 +1,49 @@
+/* Metallic Phillips screw. The head highlight stays fixed (light is top-left);
+   only the cross slot rotates per instance via --screw-rot. */
+.screw {
+  display: inline-block;
+  width: var(--screw-size);
+  height: var(--screw-size);
+  border-radius: 50%;
+  position: relative;
+  background:
+    radial-gradient(
+      circle at 38% 32%,
+      #ededf0 0%,
+      #c2c4c9 38%,
+      #8d8f95 72%,
+      #66686e 100%
+    );
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.65),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.5),
+    0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+/* Cross slot: two crossed grooves, rotated together by --screw-rot */
+.screw::before,
+.screw::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.62)
+  );
+  border-radius: 1px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.screw::before {
+  width: 2px;
+  height: 62%;
+  transform: translate(-50%, -50%) rotate(var(--screw-rot, 0deg));
+}
+
+.screw::after {
+  width: 62%;
+  height: 2px;
+  transform: translate(-50%, -50%) rotate(var(--screw-rot, 0deg));
+}
