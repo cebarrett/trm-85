@@ -175,26 +175,48 @@ export function Knob({ temperature, onTemperatureChange }: KnobProps) {
           })}
         </div>
 
-        <div
-          ref={knobRef}
-          className={styles.knob}
-          role="slider"
-          tabIndex={0}
-          aria-valuemin={MIN_TEMP}
-          aria-valuemax={MAX_TEMP}
-          aria-valuenow={temperature}
-          aria-label="Temperature"
-          onKeyDown={handleKeyDown}
-          onWheel={handleWheel}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          style={{
-            transform: `rotate(${angle}deg)`,
-          }}
-        >
-          <div className={styles.indicator} />
+        <div className={styles.knobMount}>
+          <svg className={styles.ticks} viewBox="-66 -66 132 132" aria-hidden="true">
+            {DIAL_LABELS.map(({ value, danger }) => {
+              const radians = temperatureToAngle(value) * (Math.PI / 180);
+              const sin = Math.sin(radians);
+              const cos = -Math.cos(radians);
+              return (
+                <line
+                  key={value}
+                  x1={sin * 52}
+                  y1={cos * 52}
+                  x2={sin * 62}
+                  y2={cos * 62}
+                  className={danger ? styles.tickDanger : styles.tick}
+                />
+              );
+            })}
+          </svg>
+
+          <div
+            ref={knobRef}
+            className={styles.knob}
+            role="slider"
+            tabIndex={0}
+            aria-valuemin={MIN_TEMP}
+            aria-valuemax={MAX_TEMP}
+            aria-valuenow={temperature}
+            aria-label="Temperature"
+            onKeyDown={handleKeyDown}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{
+              transform: `rotate(${angle}deg)`,
+            }}
+          >
+            <div className={styles.indicator} />
+          </div>
+
+          <div className={styles.sheen} aria-hidden="true" />
         </div>
       </div>
 
