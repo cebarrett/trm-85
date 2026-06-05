@@ -11,7 +11,7 @@
     inset 0 3px 8px rgba(0, 0, 0, 0.9),
     inset 0 0 0 1px rgba(0, 0, 0, 0.8),
     0 1px 0 rgba(255, 255, 255, 0.35);
-  font-family: "DSEG7 Classic", "Courier New", monospace;
+  font-family: var(--font-seg);
   overflow: hidden;
 }
 
@@ -33,8 +33,8 @@
   position: absolute;
   top: 9px;
   color: #3a0c00;
-  font-size: 32px;
-  letter-spacing: 2px;
+  font-size: 24px;
+  letter-spacing: 1px;
   user-select: none;
   pointer-events: none;
 }
@@ -42,8 +42,8 @@
 .value {
   position: relative;
   color: var(--led-red);
-  font-size: 32px;
-  letter-spacing: 2px;
+  font-size: 24px;
+  letter-spacing: 1px;
   text-shadow:
     0 0 8px rgba(255, 42, 26, 0.7),
     0 0 18px rgba(255, 42, 26, 0.35);
@@ -51,7 +51,7 @@
 }
 
 .label {
-  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-family: var(--font-label);
   font-size: 9px;
   color: #8a8c92;
   text-transform: uppercase;

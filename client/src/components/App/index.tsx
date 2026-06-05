@@ -49,12 +49,18 @@ export function App() {
                 />
               </div>
 
+              <div className={styles.groove} />
+
               <div className={styles.column}>
                 <VUMeter tokenRate={tokenRate} temperature={temperature} />
                 <EjectButton onEject={abort} disabled={!isGenerating} />
               </div>
 
+              <div className={styles.groove} />
+
               <PatchBay />
+
+              <div className={styles.groove} />
 
               <div className={styles.column}>
                 <LEDDisplay count={tokenCount} />

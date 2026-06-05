@@ -57,7 +57,7 @@
 
 /* Label */
 .label {
-  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-family: var(--font-label);
   font-size: 8px;
   font-weight: 700;
   color: #666;

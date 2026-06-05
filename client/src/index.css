@@ -13,7 +13,7 @@ html {
 }
 
 body {
-  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  font-family: var(--font-mono);
   background: #1a1a1a;
   color: #ccc;
   overflow-x: hidden;

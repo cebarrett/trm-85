@@ -94,9 +94,9 @@
 
 .brand {
   display: block;
-  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
-  font-size: 30px;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
   color: #33343a;
   letter-spacing: 9px;
   text-transform: uppercase;
@@ -108,7 +108,7 @@
 
 .tagline {
   display: block;
-  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-family: var(--font-label);
   font-size: 9px;
   color: #5a5c62;
   letter-spacing: 5px;

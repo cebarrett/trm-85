@@ -80,4 +80,10 @@
   /* ---- Shared dimensions ---- */
   --screw-size: 16px;
   --rail-width: 30px;
+
+  /* ---- Typography ---- */
+  --font-display: "Michroma", "Eurostile", "Orbitron", Arial, sans-serif;
+  --font-label: "Saira Condensed", "Eurostile", "Oswald", Arial, sans-serif;
+  --font-seg: "DSEG7 Classic", "Courier New", monospace;
+  --font-mono: "IBM Plex Mono", "Fira Code", ui-monospace, monospace;
 }

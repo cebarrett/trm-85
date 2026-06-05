@@ -12,7 +12,7 @@
 
 .jackLabel {
   fill: #45464b;
-  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-family: var(--font-label);
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 1.5px;

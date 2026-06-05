@@ -32,7 +32,7 @@
 
 .dialLabel {
   position: absolute;
-  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-family: var(--font-label);
   font-size: 9px;
   color: #2a2a2a;
   text-transform: uppercase;
@@ -160,7 +160,7 @@
 
 /* Recessed glass readout with a red phosphor glow */
 .readout {
-  font-family: "DSEG7 Classic", "Courier New", monospace;
+  font-family: var(--font-seg);
   font-size: 22px;
   color: var(--led-red);
   background:
