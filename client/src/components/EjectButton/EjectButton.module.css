@@ -1,32 +1,61 @@
 .button {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
-  border: 3px solid #8b0000;
-  background: radial-gradient(circle at 40% 35%, #e60000, #990000 60%, #660000);
+  border: none;
   cursor: pointer;
-  box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.5),
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   outline: none;
+  /* glossy red dome */
+  background: radial-gradient(
+    circle at 40% 32%,
+    #ff5a4a 0%,
+    #e21f10 46%,
+    #9c0d05 100%
+  );
+  box-shadow:
+    /* brushed metal collar */
+    0 0 0 4px var(--metal-55),
+    0 0 0 5px var(--metal-25),
+    /* drop shadow + domed shading */
+    0 5px 11px rgba(0, 0, 0, 0.55),
+    inset 0 2px 3px rgba(255, 255, 255, 0.45),
+    inset 0 -7px 11px rgba(0, 0, 0, 0.45);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+
+/* specular gloss highlight */
+.button::after {
+  content: "";
+  position: absolute;
+  top: 11px;
+  left: 20px;
+  right: 28px;
+  height: 28%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.55), transparent 72%);
+  pointer-events: none;
+}
+
+.button:hover:not(.disabled) {
+  filter: brightness(1.06);
 }
 
 .button:active:not(.disabled) {
   transform: translateY(2px);
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.5),
-    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    0 0 0 4px var(--metal-55),
+    0 0 0 5px var(--metal-25),
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 3px 7px rgba(0, 0, 0, 0.45);
 }
 
 .button:focus-visible {
-  outline: 2px solid #ff6600;
-  outline-offset: 3px;
+  outline: 2px solid var(--led-amber);
+  outline-offset: 7px;
 }
 
 .disabled {
@@ -41,6 +70,7 @@
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 2px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   user-select: none;
+  z-index: 1;
 }

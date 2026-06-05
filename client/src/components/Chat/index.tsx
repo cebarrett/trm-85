@@ -37,31 +37,36 @@ export function Chat({
 
   return (
     <div className={styles.container}>
-      <div className={styles.messageList}>
-        {messages.map((message, index) => (
-          <div key={index} className={styles.message}>
-            <span
-              className={
-                message.role === "user" ? styles.inputLabel : styles.outputLabel
-              }
-            >
-              {message.role === "user" ? "INPUT >" : "OUTPUT >"}
-            </span>
-            <pre className={styles.messageText}>{message.content}</pre>
-          </div>
-        ))}
+      <div className={styles.screen}>
+        <div className={styles.messageList}>
+          {messages.map((message, index) => (
+            <div key={index} className={styles.message}>
+              <span
+                className={
+                  message.role === "user" ? styles.inputLabel : styles.outputLabel
+                }
+              >
+                {message.role === "user" ? "INPUT >" : "OUTPUT >"}
+              </span>
+              <pre className={styles.messageText}>{message.content}</pre>
+            </div>
+          ))}
 
-        {isGenerating && currentStreamedText && (
-          <div className={styles.message}>
-            <span className={styles.outputLabel}>OUTPUT &gt;</span>
-            <pre className={styles.messageText}>
-              {currentStreamedText}
-              <span className={styles.cursor}>_</span>
-            </pre>
-          </div>
-        )}
+          {isGenerating && currentStreamedText && (
+            <div className={styles.message}>
+              <span className={styles.outputLabel}>OUTPUT &gt;</span>
+              <pre className={styles.messageText}>
+                {currentStreamedText}
+                <span className={styles.cursor}>_</span>
+              </pre>
+            </div>
+          )}
 
-        <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className={styles.scanlines} aria-hidden="true" />
+        <div className={styles.glare} aria-hidden="true" />
       </div>
 
       <form className={styles.inputForm} onSubmit={handleSubmit}>

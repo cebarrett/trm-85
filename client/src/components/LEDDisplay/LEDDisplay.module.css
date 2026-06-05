@@ -1,20 +1,38 @@
 .display {
   position: relative;
-  background: #1a0000;
-  border: 2px solid #333;
-  border-radius: 4px;
-  padding: 8px 12px;
+  background: linear-gradient(180deg, #240202 0%, #120000 100%);
+  border-radius: 5px;
+  padding: 9px 14px 8px;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  /* recessed glass well in a metal surround */
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(255, 255, 255, 0.35);
   font-family: "DSEG7 Classic", "Courier New", monospace;
+  overflow: hidden;
 }
 
+/* glass glare across the display */
+.display::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 38%
+  );
+}
+
+/* unlit "ghost" segments behind the value */
 .background {
   position: absolute;
-  top: 8px;
-  color: #330a00;
+  top: 9px;
+  color: #3a0c00;
   font-size: 32px;
   letter-spacing: 2px;
   user-select: none;
@@ -23,18 +41,22 @@
 
 .value {
   position: relative;
-  color: #ff1a1a;
+  color: var(--led-red);
   font-size: 32px;
   letter-spacing: 2px;
-  text-shadow: 0 0 8px rgba(255, 26, 26, 0.6), 0 0 16px rgba(255, 26, 26, 0.3);
+  text-shadow:
+    0 0 8px rgba(255, 42, 26, 0.7),
+    0 0 18px rgba(255, 42, 26, 0.35);
   z-index: 1;
 }
 
 .label {
   font-family: "Eurostile", "Orbitron", Arial, sans-serif;
   font-size: 9px;
-  color: #666;
+  color: #8a8c92;
   text-transform: uppercase;
   letter-spacing: 3px;
-  margin-top: 4px;
+  margin-top: 6px;
+  z-index: 1;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
 }
