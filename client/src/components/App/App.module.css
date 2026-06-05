@@ -7,28 +7,20 @@
   padding: 32px 20px;
 }
 
-/* Two columns: all controls on the left, chat screen filling the right */
-.mainRow {
-  display: flex;
-  align-items: stretch;
-  gap: 24px;
-}
-
-.controls {
-  /* size to the control content; the chat takes whatever width remains */
-  flex: 0 0 auto;
-  min-width: 0;
+/* Stacked rack of devices */
+.devices {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
-/* Top of the left column: knob + meter + displays, spread across */
+/* SYNTH control row: knob + meter + patch + displays, spread across */
 .controlStrip {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding-bottom: 16px;
+  padding-bottom: 14px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.22);
 }
 
@@ -41,7 +33,7 @@
   flex: 0 0 auto;
   align-self: stretch;
   width: 2px;
-  margin: 16px 0;
+  margin: 14px 0;
   border-radius: 1px;
   background: linear-gradient(
     to bottom,
@@ -63,32 +55,15 @@
   padding: 0 8px;
 }
 
-/* Bottom of the left column: personality toggles */
+/* SYNTH personality toggles */
 .toggleZone {
   padding-top: 14px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
 }
 
-/* Right column: chat screen, full height of the controls column */
-.chatZone {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* ---- Responsive: stack when too narrow ---- */
-@media (max-width: 1200px) {
-  .mainRow {
-    flex-direction: column;
-  }
-
-  .controls {
-    flex: 0 0 auto;
-  }
-
-  .chatZone {
-    min-width: 0;
-    height: 300px;
-  }
+/* MONITOR device: the chat screen */
+.monitor {
+  height: 240px;
 }
 
 @media (max-width: 767px) {

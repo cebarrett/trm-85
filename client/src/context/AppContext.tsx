@@ -3,6 +3,7 @@ import {
   useContext,
   useReducer,
   useRef,
+  useState,
   useCallback,
   type ReactNode,
 } from "react";
@@ -95,6 +96,37 @@ export function useToggles(): TogglesContextValue {
   const context = useContext(TogglesContext);
   if (!context) {
     throw new Error("useToggles must be used within a TogglesProvider");
+  }
+  return context;
+}
+
+// --- Equalizer (tone) Context ---
+
+interface EqContextValue {
+  bands: Record<string, number>;
+  setBand: (id: string, value: number) => void;
+}
+
+const EqContext = createContext<EqContextValue | null>(null);
+
+export function EqProvider({ children }: { children: ReactNode }) {
+  const [bands, setBands] = useState<Record<string, number>>({});
+
+  const setBand = useCallback((id: string, value: number) => {
+    setBands((prev) => ({ ...prev, [id]: value }));
+  }, []);
+
+  return (
+    <EqContext.Provider value={{ bands, setBand }}>
+      {children}
+    </EqContext.Provider>
+  );
+}
+
+export function useEq(): EqContextValue {
+  const context = useContext(EqContext);
+  if (!context) {
+    throw new Error("useEq must be used within an EqProvider");
   }
   return context;
 }

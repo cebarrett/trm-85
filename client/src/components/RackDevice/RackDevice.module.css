@@ -1,0 +1,56 @@
+.device {
+  display: flex;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--brushed-grain), var(--panel-fill);
+  /* mounted module: bright top seam + ambient drop, recessed into the chassis */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 0, 0, 0.18);
+}
+
+/* Left brand spine with the device name and a power LED */
+.spine {
+  flex: 0 0 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+  background: var(--panel-fill-dark);
+  box-shadow:
+    inset -2px 0 4px rgba(0, 0, 0, 0.3),
+    inset 1px 0 0 rgba(255, 255, 255, 0.18);
+}
+
+.led {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--led-amber);
+  box-shadow: var(--glow-amber);
+}
+
+.spineText {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #34353a;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  padding: 14px 20px;
+}
