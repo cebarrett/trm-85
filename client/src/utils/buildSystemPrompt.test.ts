@@ -30,4 +30,11 @@ describe("buildSystemPrompt", () => {
     expect(result).toContain("PG-13");
     expect(result).toContain("Never produce genuinely harmful content");
   });
+
+  it("forbids stage directions and asterisk roleplay", () => {
+    const result = buildSystemPrompt(["Be poetic."]);
+    expect(result).toContain("spoken dialogue");
+    expect(result).toMatch(/stage directions/i);
+    expect(result).toMatch(/never narrate/i);
+  });
 });
