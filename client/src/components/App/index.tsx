@@ -6,6 +6,7 @@ import { VUMeter } from "../VUMeter";
 import { LEDDisplay } from "../LEDDisplay";
 import { SignalMeter } from "../SignalMeter";
 import { EjectButton } from "../EjectButton";
+import { PatchBay } from "../PatchBay";
 import { ToggleBank, PERSONALITY_TOGGLES } from "../ToggleBank";
 import { Chat } from "../Chat";
 import { Deterioration } from "../Deterioration";
@@ -52,6 +53,8 @@ export function App() {
                 <VUMeter tokenRate={tokenRate} temperature={temperature} />
                 <EjectButton onEject={abort} disabled={!isGenerating} />
               </div>
+
+              <PatchBay />
 
               <div className={styles.column}>
                 <LEDDisplay count={tokenCount} />

@@ -1,0 +1,19 @@
+.bay {
+  flex: 0 0 auto;
+  width: 132px;
+}
+
+.svg {
+  display: block;
+  width: 132px;
+  height: 112px;
+  overflow: visible;
+}
+
+.jackLabel {
+  fill: #45464b;
+  font-family: "Eurostile", "Orbitron", Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
